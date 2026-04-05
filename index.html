@@ -953,11 +953,23 @@ revealNodes.forEach((node) => observer.observe(node));
 // ── Smooth hash scroll ──────────────────────────────────────────
 const sectionLinks = document.querySelectorAll('a[href^="#"]');
 
+const getTopbarOffset = () => {
+  const topbar = document.querySelector(".topbar");
+  if (!topbar) return 0;
+  // On mobile the topbar is position:static so it doesn't overlap
+  const isSticky = getComputedStyle(topbar).position === "sticky";
+  if (!isSticky) return 0;
+  // topbar sits at top:18px, so total clearance = height + 18px gap + 12px breathing room
+  return topbar.getBoundingClientRect().height + 18 + 12;
+};
+
 const scrollToTarget = (hash, behavior = "smooth") => {
   if (!hash || hash === "#") return;
   const target = document.querySelector(hash);
   if (!target) return;
-  target.scrollIntoView({ behavior, block: "start" });
+  const offset = getTopbarOffset();
+  const top = target.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior });
 };
 
 sectionLinks.forEach((link) => {
