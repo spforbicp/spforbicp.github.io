@@ -15,6 +15,7 @@
       rel="stylesheet"
     />
     <style>
+/* ─── Design Tokens ─────────────────────────────────────────── */
 :root {
   --bg: #070916;
   --bg-accent: #0d1124;
@@ -34,7 +35,8 @@
   --max-width: 1160px;
 }
 
-* {
+/* ─── Reset & Base ───────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
 }
 
@@ -54,11 +56,13 @@ body {
     linear-gradient(180deg, #040611 0%, var(--bg) 48%, #090d1c 100%);
 }
 
+/* ─── Global grid overlay ────────────────────────────────────── */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
   background-image:
     linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
@@ -66,25 +70,30 @@ body::before {
   mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.4), transparent 75%);
 }
 
+/* ─── Global ambient glow ────────────────────────────────────── */
 body::after {
   content: "";
   position: fixed;
   inset: 0;
   pointer-events: none;
+  z-index: 0;
   background:
     radial-gradient(circle at 22% 24%, rgba(55, 243, 255, 0.14), transparent 18%),
     radial-gradient(circle at 78% 20%, rgba(100, 141, 255, 0.16), transparent 20%),
     radial-gradient(circle at 50% 80%, rgba(255, 79, 216, 0.14), transparent 24%);
   filter: blur(24px);
-  opacity: 1;
 }
 
+/* ─── Layout Shell ───────────────────────────────────────────── */
 .site-shell {
+  position: relative;
+  z-index: 1;
   width: min(calc(100% - 32px), var(--max-width));
   margin: 0 auto;
   padding: 24px 0 48px;
 }
 
+/* ─── Topbar ─────────────────────────────────────────────────── */
 .topbar {
   position: sticky;
   top: 18px;
@@ -93,8 +102,9 @@ body::after {
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  padding: 18px 22px;
+  padding: 16px 24px;
   backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
   background: rgba(10, 14, 31, 0.68);
   border: 1px solid rgba(100, 141, 255, 0.18);
   border-radius: 999px;
@@ -103,6 +113,7 @@ body::after {
     0 0 24px rgba(55, 243, 255, 0.08);
 }
 
+/* ─── Shared link / button reset ────────────────────────────── */
 .brand,
 .nav a,
 .button {
@@ -112,29 +123,39 @@ body::after {
 .brand {
   color: var(--text);
   font-weight: 700;
+  font-size: 0.82rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  font-size: 0.82rem;
+  white-space: nowrap;
 }
 
 .nav {
   display: flex;
   flex-wrap: wrap;
   justify-content: flex-end;
-  gap: 16px;
+  gap: 20px;
 }
 
 .nav a {
   color: var(--muted);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  transition: color 200ms ease;
 }
 
+.nav a:hover,
+.nav a:focus-visible {
+  color: var(--text);
+}
+
+/* ─── Main grid ──────────────────────────────────────────────── */
 main {
   display: grid;
   gap: 22px;
   margin-top: 22px;
 }
 
+/* ─── Panel (shared card shell) ─────────────────────────────── */
 .panel {
   position: relative;
   overflow: hidden;
@@ -142,65 +163,68 @@ main {
   border: 1px solid var(--line);
   background: var(--surface);
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   box-shadow:
     var(--shadow),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset,
-    0 0 44px rgba(55, 243, 255, 0.08);
+    0 0 0 1px rgba(255, 255, 255, 0.06) inset,
+    0 0 44px rgba(55, 243, 255, 0.06);
 }
 
-.panel::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background:
-    radial-gradient(circle at top right, rgba(100, 141, 255, 0.18), transparent 26%),
-    radial-gradient(circle at bottom left, rgba(55, 243, 255, 0.12), transparent 28%);
-  opacity: 0.9;
-}
-
+/* Inner edge highlight */
 .panel::after {
   content: "";
   position: absolute;
   inset: 1px;
   border-radius: inherit;
   pointer-events: none;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   mask-image: linear-gradient(145deg, rgba(0, 0, 0, 1), transparent 55%);
 }
 
+/* ─── Hero ───────────────────────────────────────────────────── */
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(260px, 0.8fr);
   gap: 24px;
-  align-items: stretch;
-  padding: 42px;
+  align-items: center; /* was stretch — prevents hero-card from over-stretching on narrow text */
+  padding: 48px 42px;
 }
 
-.hero::before {
-  content: "";
+/* Hero ambient orbs — using child divs instead of ::before/::after
+   so they don't conflict with .panel::after */
+.hero-orb {
   position: absolute;
-  inset: auto auto -110px -60px;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(16px);
+}
+
+.hero-orb--cyan {
+  bottom: -110px;
+  left: -60px;
   width: 280px;
   height: 280px;
-  border-radius: 50%;
   background: radial-gradient(circle, rgba(55, 243, 255, 0.26), transparent 62%);
-  filter: blur(16px);
   animation: floatGlow 10s ease-in-out infinite;
 }
 
-.hero::after {
-  content: "";
-  position: absolute;
-  inset: -40px -60px auto auto;
+.hero-orb--pink {
+  top: -40px;
+  right: -60px;
   width: 260px;
   height: 260px;
-  border-radius: 50%;
   background: radial-gradient(circle, rgba(255, 79, 216, 0.24), transparent 62%);
-  filter: blur(16px);
   animation: floatGlow 12s ease-in-out infinite reverse;
 }
 
+.hero-copy,
+.hero-card {
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Shared headings ────────────────────────────────────────── */
 .hero-copy h1,
 .section-heading h2,
 .contact h2 {
@@ -212,8 +236,8 @@ main {
 }
 
 .hero-copy h1 {
-  max-width: 9ch;
-  font-size: clamp(3.6rem, 8vw, 7.4rem);
+  font-size: clamp(3.2rem, 7vw, 7rem);
+  max-width: 10ch;
 }
 
 .hero-copy h1 span {
@@ -229,28 +253,20 @@ main {
   margin: 0 0 18px;
   color: var(--neo-cyan);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  font-size: 0.75rem;
   font-weight: 700;
 }
 
-.lead,
-.content-card p,
-.strength-card p,
-.timeline-item p,
-.contact p,
-.footer p {
+.lead {
+  max-width: 52ch;
+  margin: 20px 0 0;
   color: var(--muted);
   line-height: 1.7;
-  font-size: 1rem;
+  font-size: 1.05rem;
 }
 
-.lead {
-  max-width: 54ch;
-  margin: 20px 0 0;
-  font-size: 1.08rem;
-}
-
+/* ─── Hero actions ───────────────────────────────────────────── */
 .hero-actions {
   display: flex;
   flex-wrap: wrap;
@@ -258,75 +274,81 @@ main {
   margin-top: 28px;
 }
 
+/* ─── Buttons ────────────────────────────────────────────────── */
 .button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-height: 50px;
-  padding: 0 22px;
+  padding: 0 26px;
   border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.95rem;
   font-weight: 700;
+  cursor: pointer;
   transition:
     transform 200ms ease,
-    background-color 200ms ease,
-    color 200ms ease,
-    border-color 200ms ease,
-    box-shadow 200ms ease;
+    box-shadow 200ms ease,
+    background-color 200ms ease;
 }
 
 .button:hover,
 .button:focus-visible {
   transform: translateY(-2px);
-  box-shadow:
-    0 0 0 1px rgba(255, 255, 255, 0.12) inset,
-    0 0 20px rgba(55, 243, 255, 0.26),
-    0 0 36px rgba(255, 79, 216, 0.18);
 }
 
 .button.primary {
   color: #f8fbff;
-  background:
-    linear-gradient(135deg, rgba(255, 255, 255, 0.18), transparent),
-    linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 48%, var(--neo-blue) 100%);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-deep) 50%, var(--neo-blue) 100%);
   box-shadow:
     0 14px 30px rgba(16, 12, 34, 0.38),
     0 0 22px rgba(255, 79, 216, 0.38),
     0 0 42px rgba(100, 141, 255, 0.28);
 }
 
+.button.primary:hover,
+.button.primary:focus-visible {
+  box-shadow:
+    0 16px 36px rgba(16, 12, 34, 0.42),
+    0 0 30px rgba(255, 79, 216, 0.5),
+    0 0 52px rgba(100, 141, 255, 0.36);
+}
+
 .button.secondary {
   color: var(--text);
-  border: 1px solid rgba(55, 243, 255, 0.24);
+  border: 1px solid rgba(55, 243, 255, 0.28);
   background: rgba(10, 15, 34, 0.5);
   box-shadow:
-    0 0 18px rgba(100, 141, 255, 0.14),
-    0 0 32px rgba(55, 243, 255, 0.08);
+    0 0 18px rgba(100, 141, 255, 0.1),
+    0 0 32px rgba(55, 243, 255, 0.06);
 }
 
-.hero-card,
-.content-card,
-.strength-card,
-.timeline-item,
-.contact {
-  border-radius: var(--radius-md);
+.button.secondary:hover,
+.button.secondary:focus-visible {
+  border-color: rgba(55, 243, 255, 0.5);
+  box-shadow:
+    0 0 20px rgba(55, 243, 255, 0.22),
+    0 0 36px rgba(100, 141, 255, 0.14);
 }
 
+/* ─── Hero card ──────────────────────────────────────────────── */
 .hero-card {
   position: relative;
   padding: 28px;
-  background:
-    linear-gradient(180deg, rgba(8, 12, 27, 0.98), rgba(16, 22, 46, 0.96));
-  color: #eff6fb;
+  border-radius: var(--radius-md);
+  background: linear-gradient(180deg, rgba(8, 12, 27, 0.98), rgba(16, 22, 46, 0.96));
   isolation: isolate;
+  overflow: hidden; /* keeps glow clipped inside card */
   box-shadow:
     0 24px 60px rgba(2, 6, 18, 0.42),
     0 0 0 1px rgba(100, 141, 255, 0.16) inset,
-    0 0 34px rgba(100, 141, 255, 0.28);
+    0 0 34px rgba(100, 141, 255, 0.24);
 }
 
 .hero-card__glow {
   position: absolute;
-  inset: auto -18% -28% auto;
+  right: -18%;
+  bottom: -28%;
   width: 220px;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -340,10 +362,11 @@ main {
 
 .card-label {
   margin: 0 0 18px;
-  color: rgba(239, 246, 251, 0.66);
+  color: rgba(239, 246, 251, 0.6);
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  font-size: 0.78rem;
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .hero-card ul {
@@ -351,42 +374,67 @@ main {
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 14px;
+  gap: 0;
 }
 
 .hero-card li {
   padding: 16px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
-  font-size: 1.02rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 1rem;
+  color: #eff6fb;
   line-height: 1.5;
 }
 
+.hero-card li:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.hero-card li:first-child {
+  padding-top: 0;
+}
+
+/* ─── About / Journey two-column grid ────────────────────────── */
 .grid {
   display: grid;
-  grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); /* more balanced than 0.7/1.3 */
   gap: 22px;
-  padding: 34px;
+  padding: 40px;
+  align-items: start; /* stop columns from stretching each other */
+}
+
+.section-heading {
+  /* No extra wrapper styles needed; padding comes from parent */
 }
 
 .section-heading h2,
 .contact h2 {
-  font-size: clamp(2.3rem, 5vw, 4rem);
+  font-size: clamp(2rem, 4.5vw, 3.6rem);
 }
 
+/* ─── Content card (About body) ──────────────────────────────── */
 .content-card {
   padding: 28px;
+  border-radius: var(--radius-md);
   background: rgba(10, 14, 32, 0.64);
   border: 1px solid rgba(100, 141, 255, 0.14);
   box-shadow:
     0 16px 40px rgba(2, 6, 18, 0.24),
-    0 0 24px rgba(55, 243, 255, 0.12);
+    0 0 24px rgba(55, 243, 255, 0.1);
+  display: grid;
+  gap: 16px; /* replaces fragile p:first-child margin hack */
 }
 
-.content-card p:first-child,
-.strength-card p,
-.timeline-item p,
-.contact p {
-  margin-top: 0;
+.content-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.75;
+  font-size: 1rem;
+}
+
+/* ─── Strengths ──────────────────────────────────────────────── */
+#strengths .section-heading {
+  padding: 40px 34px 24px; /* top + sides + bottom gap before cards */
 }
 
 .strength-grid {
@@ -397,20 +445,29 @@ main {
 }
 
 .strength-card {
-  padding: 24px;
+  padding: 26px;
+  border-radius: var(--radius-md);
   background: rgba(12, 17, 36, 0.72);
   border: 1px solid rgba(100, 141, 255, 0.14);
   box-shadow:
     0 12px 30px rgba(2, 6, 18, 0.22),
-    0 0 24px rgba(100, 141, 255, 0.14);
+    0 0 24px rgba(100, 141, 255, 0.12);
 }
 
-.strength-card h3,
-.timeline-item h3 {
+.strength-card h3 {
   margin: 0 0 10px;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
+  font-weight: 700;
 }
 
+.strength-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.97rem;
+}
+
+/* ─── Journey timeline ───────────────────────────────────────── */
 .timeline {
   display: grid;
   gap: 16px;
@@ -420,12 +477,14 @@ main {
   display: grid;
   grid-template-columns: 60px minmax(0, 1fr);
   gap: 18px;
+  align-items: start;
   padding: 22px;
+  border-radius: var(--radius-md);
   background: rgba(11, 16, 34, 0.6);
   border: 1px solid rgba(100, 141, 255, 0.14);
   box-shadow:
     0 12px 30px rgba(2, 6, 18, 0.22),
-    0 0 20px rgba(255, 79, 216, 0.12);
+    0 0 20px rgba(255, 79, 216, 0.1);
 }
 
 .timeline-item span {
@@ -435,29 +494,57 @@ main {
   width: 52px;
   height: 52px;
   border-radius: 18px;
+  flex-shrink: 0;
   background:
     linear-gradient(135deg, rgba(55, 243, 255, 0.22), rgba(100, 141, 255, 0.2)),
     rgba(255, 79, 216, 0.14);
   color: #f3f7ff;
   font-weight: 700;
+  font-size: 0.9rem;
   box-shadow:
-    0 0 18px rgba(55, 243, 255, 0.24),
-    0 0 28px rgba(100, 141, 255, 0.18),
-    0 0 0 1px rgba(255, 255, 255, 0.16) inset;
+    0 0 18px rgba(55, 243, 255, 0.22),
+    0 0 28px rgba(100, 141, 255, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.14) inset;
 }
 
+.timeline-item h3 {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
+}
+
+.timeline-item p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.7;
+  font-size: 0.97rem;
+}
+
+/* ─── Contact ────────────────────────────────────────────────── */
 .contact {
-  padding: 38px;
+  padding: 52px 40px;
   text-align: center;
   box-shadow:
     0 24px 50px rgba(2, 6, 18, 0.26),
-    0 0 36px rgba(55, 243, 255, 0.14);
+    0 0 36px rgba(55, 243, 255, 0.12);
+}
+
+.contact h2 {
+  margin-bottom: 16px;
+}
+
+.contact > p {
+  margin: 0 auto;
+  max-width: 48ch;
+  color: var(--muted);
+  line-height: 1.7;
 }
 
 .contact .button {
-  margin-top: 8px;
+  margin-top: 28px; /* was 8px — too tight */
 }
 
+/* ─── Footer ─────────────────────────────────────────────────── */
 .footer {
   display: flex;
   justify-content: space-between;
@@ -466,12 +553,19 @@ main {
   padding: 20px 8px 0;
 }
 
+.footer p {
+  margin: 0; /* was missing — caused vertical overflow */
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+/* ─── Reveal animation ───────────────────────────────────────── */
 .reveal {
   opacity: 0;
-  transform: translateY(22px);
+  transform: translateY(18px);
   transition:
-    opacity 700ms ease,
-    transform 700ms ease;
+    opacity 600ms ease,
+    transform 600ms ease;
 }
 
 .reveal.is-visible {
@@ -479,42 +573,38 @@ main {
   transform: translateY(0);
 }
 
+/* ─── Keyframes ──────────────────────────────────────────────── */
 @keyframes floatGlow {
-  0%,
-  100% {
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-
-  50% {
-    transform: translate3d(10px, -14px, 0) scale(1.05);
-  }
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50%       { transform: translate3d(10px, -14px, 0) scale(1.05); }
 }
 
 @keyframes pulseGlow {
-  0%,
-  100% {
-    opacity: 0.78;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
+  0%, 100% { opacity: 0.78; transform: scale(1); }
+  50%       { opacity: 1;    transform: scale(1.08); }
 }
 
+/* ─── Responsive: tablet ─────────────────────────────────────── */
 @media (max-width: 960px) {
   .hero,
-  .grid,
-  .strength-grid {
+  .grid {
     grid-template-columns: 1fr;
   }
 
+  .strength-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .hero {
-    padding: 30px;
+    padding: 32px;
+  }
+
+  .grid {
+    padding: 32px;
   }
 }
 
+/* ─── Responsive: mobile ─────────────────────────────────────── */
 @media (max-width: 720px) {
   .site-shell {
     width: min(calc(100% - 20px), var(--max-width));
@@ -524,12 +614,14 @@ main {
   .topbar {
     position: static;
     border-radius: 24px;
-    padding: 18px;
+    padding: 16px 18px;
+    flex-wrap: wrap;
   }
 
   .nav {
     width: 100%;
     justify-content: flex-start;
+    gap: 16px;
   }
 
   .hero,
@@ -538,16 +630,114 @@ main {
     padding: 24px;
   }
 
-  .strength-grid {
-    padding: 0 24px 24px;
+  .hero-copy h1 {
+    font-size: clamp(2.8rem, 16vw, 4.2rem);
   }
 
-  .hero-copy h1 {
-    font-size: clamp(3rem, 18vw, 4.4rem);
+  #strengths .section-heading {
+    padding: 28px 24px 20px;
+  }
+
+  .strength-grid {
+    grid-template-columns: 1fr;
+    padding: 0 24px 24px;
   }
 
   .timeline-item {
     grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .contact {
+    padding: 36px 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-actions {
+    flex-direction: column;
+  }
+
+  .hero-actions .button {
+    width: 100%;
+  }
+}
+
+/* ─── Go-to-top button ───────────────────────────────────────── */
+.go-top {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 99;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 1px solid rgba(55, 243, 255, 0.28);
+  background:
+    linear-gradient(135deg, rgba(255, 79, 216, 0.18), rgba(100, 141, 255, 0.18)),
+    rgba(10, 14, 31, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: var(--text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow:
+    0 8px 28px rgba(2, 6, 18, 0.42),
+    0 0 18px rgba(55, 243, 255, 0.16),
+    0 0 32px rgba(255, 79, 216, 0.12);
+  /* hidden by default */
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.9);
+  transition:
+    opacity 300ms ease,
+    transform 300ms ease,
+    box-shadow 200ms ease,
+    border-color 200ms ease;
+}
+
+.go-top.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+}
+
+.go-top:hover,
+.go-top:focus-visible {
+  border-color: rgba(55, 243, 255, 0.55);
+  box-shadow:
+    0 10px 34px rgba(2, 6, 18, 0.48),
+    0 0 26px rgba(55, 243, 255, 0.32),
+    0 0 44px rgba(255, 79, 216, 0.22);
+  transform: translateY(-3px) scale(1.06);
+  outline: none;
+}
+
+.go-top svg {
+  width: 20px;
+  height: 20px;
+  stroke: var(--neo-cyan);
+  stroke-width: 2.2;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 5px rgba(55, 243, 255, 0.7));
+  transition: transform 200ms ease;
+}
+
+.go-top:hover svg,
+.go-top:focus-visible svg {
+  transform: translateY(-2px);
+}
+
+@media (max-width: 720px) {
+  .go-top {
+    bottom: 20px;
+    right: 20px;
+    width: 46px;
+    height: 46px;
   }
 }
     </style>
@@ -556,7 +746,7 @@ main {
     <div class="site-shell">
       <header class="topbar">
         <a class="brand" href="#home">SP Forbicp</a>
-        <nav class="nav">
+        <nav class="nav" aria-label="Site navigation">
           <a href="#about">About</a>
           <a href="#strengths">Strengths</a>
           <a href="#journey">Journey</a>
@@ -565,10 +755,16 @@ main {
       </header>
 
       <main id="home">
-        <section class="hero panel">
+
+        <!-- ── Hero ─────────────────────────────────────── -->
+        <section class="hero panel" aria-labelledby="hero-heading">
+          <!-- Ambient orbs as child divs (not ::before/::after which conflict with .panel) -->
+          <div class="hero-orb hero-orb--cyan" aria-hidden="true"></div>
+          <div class="hero-orb hero-orb--pink" aria-hidden="true"></div>
+
           <div class="hero-copy">
             <p class="eyebrow reveal">Portfolio 2026</p>
-            <h1 class="reveal">
+            <h1 id="hero-heading" class="reveal">
               Digital ideas,
               <span>shaped with clarity</span>
               and a human touch.
@@ -584,7 +780,7 @@ main {
           </div>
 
           <div class="hero-card reveal">
-            <div class="hero-card__glow"></div>
+            <div class="hero-card__glow" aria-hidden="true"></div>
             <p class="card-label">Currently focused on</p>
             <ul>
               <li>Crafting responsive web interfaces</li>
@@ -594,10 +790,11 @@ main {
           </div>
         </section>
 
-        <section id="about" class="grid panel">
+        <!-- ── About ─────────────────────────────────────── -->
+        <section id="about" class="grid panel" aria-labelledby="about-heading">
           <div class="section-heading reveal">
             <p class="eyebrow">About</p>
-            <h2>Built for first impressions that actually last.</h2>
+            <h2 id="about-heading">Built for first impressions that actually last.</h2>
           </div>
           <div class="content-card reveal">
             <p>
@@ -614,10 +811,11 @@ main {
           </div>
         </section>
 
-        <section id="strengths" class="panel">
+        <!-- ── Strengths ──────────────────────────────────── -->
+        <section id="strengths" class="panel" aria-labelledby="strengths-heading">
           <div class="section-heading reveal">
             <p class="eyebrow">Strengths</p>
-            <h2>What I bring to every build.</h2>
+            <h2 id="strengths-heading">What I bring to every build.</h2>
           </div>
           <div class="strength-grid">
             <article class="strength-card reveal">
@@ -644,14 +842,15 @@ main {
           </div>
         </section>
 
-        <section id="journey" class="grid panel">
+        <!-- ── Journey ────────────────────────────────────── -->
+        <section id="journey" class="grid panel" aria-labelledby="journey-heading">
           <div class="section-heading reveal">
             <p class="eyebrow">Journey</p>
-            <h2>A simple process that keeps momentum high.</h2>
+            <h2 id="journey-heading">A simple process that keeps momentum high.</h2>
           </div>
           <div class="timeline">
             <article class="timeline-item reveal">
-              <span>01</span>
+              <span aria-hidden="true">01</span>
               <div>
                 <h3>Understand the goal</h3>
                 <p>
@@ -661,7 +860,7 @@ main {
               </div>
             </article>
             <article class="timeline-item reveal">
-              <span>02</span>
+              <span aria-hidden="true">02</span>
               <div>
                 <h3>Shape the experience</h3>
                 <p>
@@ -671,7 +870,7 @@ main {
               </div>
             </article>
             <article class="timeline-item reveal">
-              <span>03</span>
+              <span aria-hidden="true">03</span>
               <div>
                 <h3>Refine the details</h3>
                 <p>
@@ -683,17 +882,19 @@ main {
           </div>
         </section>
 
-        <section id="contact" class="contact panel reveal">
+        <!-- ── Contact ────────────────────────────────────── -->
+        <section id="contact" class="contact panel reveal" aria-labelledby="contact-heading">
           <p class="eyebrow">Contact</p>
-          <h2>Let’s build something that feels unmistakably modern.</h2>
+          <h2 id="contact-heading">Let's build something that feels unmistakably modern.</h2>
           <p>
             Available for portfolio sites, landing pages, and front-end focused
             web projects.
           </p>
-          <a class="button primary" href="mailto:hello@example.com"
-            >hello@example.com</a
-          >
+          <a class="button primary" href="/cdn-cgi/l/email-protection#741c1118181b34110c15190418115a171b19">
+            <span class="__cf_email__" data-cfemail="046c6168686b44617c65697468612a676b69">[email&#160;protected]</span>
+          </a>
         </section>
+
       </main>
 
       <footer class="footer">
@@ -702,14 +903,29 @@ main {
       </footer>
     </div>
 
-    <script>
-const yearNode = document.getElementById("year");
-const revealNodes = document.querySelectorAll(".reveal");
-const sectionLinks = document.querySelectorAll('a[href^="#"]');
+    <!-- Go-to-top button (outside site-shell so it's viewport-fixed) -->
+    <button
+      class="go-top"
+      id="goTop"
+      aria-label="Scroll back to top"
+      title="Back to top"
+    >
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <polyline points="18 15 12 9 6 15"></polyline>
+      </svg>
+    </button>
 
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+// ── Year ────────────────────────────────────────────────────────
+const yearNode = document.getElementById("year");
 if (yearNode) {
   yearNode.textContent = new Date().getFullYear();
 }
+
+// ── Reveal on scroll ────────────────────────────────────────────
+// Per-section delay cap so elements in separate sections don't
+// accumulate one global ever-growing delay.
+const revealNodes = document.querySelectorAll(".reveal");
 
 const observer = new IntersectionObserver(
   (entries) => {
@@ -720,41 +936,34 @@ const observer = new IntersectionObserver(
       }
     });
   },
-  {
-    threshold: 0.18,
-  }
+  { threshold: 0.14 }
 );
 
-revealNodes.forEach((node, index) => {
-  node.style.transitionDelay = `${Math.min(index * 80, 480)}ms`;
-  observer.observe(node);
+// Group reveals by parent section so delay resets per section
+const sections = document.querySelectorAll("main > section, main > .panel");
+sections.forEach((section) => {
+  const sectionReveals = section.querySelectorAll(".reveal");
+  sectionReveals.forEach((node, i) => {
+    node.style.transitionDelay = `${Math.min(i * 90, 360)}ms`;
+  });
 });
 
+revealNodes.forEach((node) => observer.observe(node));
+
+// ── Smooth hash scroll ──────────────────────────────────────────
+const sectionLinks = document.querySelectorAll('a[href^="#"]');
+
 const scrollToTarget = (hash, behavior = "smooth") => {
-  if (!hash || hash === "#") {
-    return;
-  }
-
+  if (!hash || hash === "#") return;
   const target = document.querySelector(hash);
-
-  if (!target) {
-    return;
-  }
-
-  target.scrollIntoView({
-    behavior,
-    block: "start",
-  });
+  if (!target) return;
+  target.scrollIntoView({ behavior, block: "start" });
 };
 
 sectionLinks.forEach((link) => {
   link.addEventListener("click", (event) => {
     const hash = link.getAttribute("href");
-
-    if (!hash) {
-      return;
-    }
-
+    if (!hash) return;
     event.preventDefault();
     scrollToTarget(hash);
     window.history.replaceState(null, "", window.location.pathname);
@@ -763,7 +972,6 @@ sectionLinks.forEach((link) => {
 
 if (window.location.hash) {
   const initialHash = window.location.hash;
-
   window.addEventListener(
     "load",
     () => {
@@ -772,6 +980,40 @@ if (window.location.hash) {
     },
     { once: true }
   );
+}
+
+// ── Go-to-top button ────────────────────────────────────────────
+const goTopBtn = document.getElementById("goTop");
+
+if (goTopBtn) {
+  const SHOW_THRESHOLD = 320; // px scrolled before button appears
+
+  const toggleGoTop = () => {
+    if (window.scrollY > SHOW_THRESHOLD) {
+      goTopBtn.classList.add("is-visible");
+    } else {
+      goTopBtn.classList.remove("is-visible");
+    }
+  };
+
+  // Throttle scroll handler for performance
+  let ticking = false;
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        toggleGoTop();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  goTopBtn.addEventListener("click", () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+  // Run once on load in case page is already scrolled (e.g. browser restore)
+  toggleGoTop();
 }
     </script>
   </body>
